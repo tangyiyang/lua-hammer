@@ -1,10 +1,11 @@
 local hammer = {}
 
+local modules = {}
 local os = {}
 local cmdline = {}
 
-hammer.os = os
-hammer.cmdline = cmdline
+modules.os = os
+modules.cmdline = cmdline
 
 -- capture the output of system cmd.
 function os.capture(cmd, raw)
@@ -51,8 +52,13 @@ function cmdline.get_opt( arg, options )
 end
 
 function hammer.exports()
-	for mod, funcs in pairs(hammer) do
+	for mod, funcs in pairs(modules) do
 		local G_mod = _G[mod]
+    if not G_mod then
+      G_mod = {}
+      _G[mod] = G_mod
+    end
+
 		for name, f in pairs(funcs) do
 			G_mod[name] = f
 		end
