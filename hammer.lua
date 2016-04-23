@@ -1,14 +1,37 @@
 local hammer = {}
 
-local modules = {}
-local os = {}
-local cmdline = {}
+local modules = {
+  os = {},
+  string = {},
+  cmdline = {},
+}
 
-modules.os = os
-modules.cmdline = cmdline
+local M = modules
+
+-- split string with pattern into a table
+function M.string.split(str, pat)
+    local tinsert = table.insert
+    local t = {}  -- NOTE: use {n = 0} in Lua-5.0
+    local fpat = "(.-)" .. pat
+    local last_end = 1
+    local s, e, cap = str:find(fpat, 1)
+    while s do
+        if s ~= 1 or cap ~= "" then
+            tinsert(t,cap)
+        end
+        last_end = e+1
+        s, e, cap = str:find(fpat, last_end)
+    end
+    if last_end <= #str then
+        cap = str:sub(last_end)
+        tinsert(t, cap)
+    end
+    return t
+end
+
 
 -- capture the output of system cmd.
-function os.capture(cmd, raw)
+function M.os.capture(cmd, raw)
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -20,7 +43,7 @@ function os.capture(cmd, raw)
 end
 
 -- parse cmdline to a table
-function cmdline.get_opt( arg, options )
+function M.cmdline.get_opt( arg, options )
   local tab = {}
   for k, v in ipairs(arg) do
     if string.sub( v, 1, 2) == "--" then
